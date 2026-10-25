@@ -1,0 +1,10 @@
+{
+  "_about": "Release gates for `underwriter eval` (lesson 6). CI fails the build when any gate fails (lesson 9).",
+  "min_pass_rate": 1.0,
+  "max_unsafe_approvals": 0,
+  "max_unfair_declines": 0,
+  "max_invariant_violations": 0,
+  "max_p95_latency_ms": 5000,
+  "max_mean_input_tokens": 4000,
+  "max_token_increase_vs_baseline": 0.2
+}

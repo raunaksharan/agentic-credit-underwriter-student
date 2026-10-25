@@ -11,3 +11,4 @@ One system, built lesson by lesson. Each lesson folder has the guide, `START-HER
 | 04 | [Tool-using agents](04-tool-agents/) | `solution/lesson-04` | `starter/lesson-04` |
 | 05 | [Agentic workflows](05-agentic-workflows/) | `solution/lesson-05` | `starter/lesson-05` |
 | 06 | [Testing and evaluation](06-evaluation/) | `solution/lesson-06` | `starter/lesson-06` |
+| 07 | [Observability](07-observability/) | `solution/lesson-07` | `starter/lesson-07` |
