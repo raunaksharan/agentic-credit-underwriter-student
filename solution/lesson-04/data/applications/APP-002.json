@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-002",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Marcus Bell",
+    "date_of_birth": "1986-11-02",
+    "national_id_last4": "7310",
+    "email": "marcus.bell@example.com",
+    "address": {
+      "line1": "402 Hillcrest Ave",
+      "city": "Columbus",
+      "state": "OH",
+      "postal_code": "43215"
+    }
+  },
+  "employment": {
+    "employer_name": "Keystone Logistics",
+    "job_title": "Operations Supervisor",
+    "employment_type": "full_time",
+    "start_date": "2017-02-15",
+    "stated_annual_income": 62000
+  },
+  "loan": {
+    "amount": 20000,
+    "term_months": 48,
+    "purpose": "home_improvement",
+    "annual_interest_rate": 0.149
+  },
+  "existing_monthly_debt_payments": 1800,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-002/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-002/bank_statement.csv"
+    }
+  ]
+}

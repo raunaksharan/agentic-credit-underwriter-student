@@ -1,0 +1,44 @@
+{
+  "application_id": "APP-001",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Priya Raman",
+    "date_of_birth": "1990-03-14",
+    "national_id_last4": "4821",
+    "email": "priya.raman@example.com",
+    "address": {
+      "line1": "18 Alder Court",
+      "city": "Austin",
+      "state": "TX",
+      "postal_code": "78701"
+    }
+  },
+  "employment": {
+    "employer_name": "Brightwave Software",
+    "job_title": "Senior Software Engineer",
+    "employment_type": "full_time",
+    "start_date": "2019-06-01",
+    "stated_annual_income": 96000
+  },
+  "loan": {
+    "amount": 15000,
+    "term_months": 36,
+    "purpose": "debt_consolidation",
+    "annual_interest_rate": 0.119
+  },
+  "existing_monthly_debt_payments": 450,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-001/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-001/bank_statement.csv"
+    },
+    {
+      "doc_type": "employment_letter",
+      "path": "documents/APP-001/employment_letter.txt"
+    }
+  ]
+}

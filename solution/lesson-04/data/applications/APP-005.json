@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-005",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Sofia Lindqvist",
+    "date_of_birth": "1992-05-18",
+    "national_id_last4": "3388",
+    "email": "sofia.lindqvist@example.com",
+    "address": {
+      "line1": "231 Birch Street",
+      "city": "Minneapolis",
+      "state": "MN",
+      "postal_code": "55401"
+    }
+  },
+  "employment": {
+    "employer_name": "Northgate Hospitality",
+    "job_title": "Front Desk Associate",
+    "employment_type": "full_time",
+    "start_date": "2022-01-10",
+    "stated_annual_income": 41000
+  },
+  "loan": {
+    "amount": 8000,
+    "term_months": 24,
+    "purpose": "personal",
+    "annual_interest_rate": 0.219
+  },
+  "existing_monthly_debt_payments": 520,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-005/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-005/bank_statement.csv"
+    }
+  ]
+}
