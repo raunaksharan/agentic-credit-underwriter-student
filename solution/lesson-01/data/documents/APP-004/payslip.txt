@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Crestline Retail Group
+Employee: Daniel Okafor
+Job title: Store Manager
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 7,000.00
+Federal tax: 980.00
+State tax: 350.00
+Social security & medicare: 535.50
+Retirement 401(k): 350.00
+Net pay this period: 4,784.50
+
+Year-to-date gross: 63,000.00

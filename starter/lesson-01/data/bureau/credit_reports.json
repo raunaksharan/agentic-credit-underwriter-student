@@ -1,0 +1,51 @@
+{
+  "4821": {
+    "score": 742,
+    "open_accounts": 4,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 128,
+    "reported_monthly_debt": 450
+  },
+  "7310": {
+    "score": 691,
+    "open_accounts": 7,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 160,
+    "reported_monthly_debt": 1800
+  },
+  "9047": {
+    "score": 705,
+    "open_accounts": 5,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 140,
+    "reported_monthly_debt": 900
+  },
+  "3388": {
+    "score": 561,
+    "open_accounts": 6,
+    "delinquencies_last_24m": 4,
+    "credit_history_months": 70,
+    "reported_monthly_debt": 520
+  },
+  "6125": {
+    "score": 718,
+    "open_accounts": 3,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 190,
+    "reported_monthly_debt": 600
+  },
+  "2290": {
+    "score": 702,
+    "open_accounts": 4,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 110,
+    "reported_monthly_debt": 400
+  },
+  "8406": {
+    "score": 705,
+    "open_accounts": 6,
+    "delinquencies_last_24m": 0,
+    "credit_history_months": 132,
+    "reported_monthly_debt": 2130
+  }
+}

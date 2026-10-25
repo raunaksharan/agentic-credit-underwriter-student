@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Keystone Logistics
+Employee: Marcus Bell
+Job title: Operations Supervisor
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 5,166.67
+Federal tax: 723.33
+State tax: 258.33
+Social security & medicare: 395.25
+Retirement 401(k): 258.33
+Net pay this period: 3,531.42
+
+Year-to-date gross: 46,500.03

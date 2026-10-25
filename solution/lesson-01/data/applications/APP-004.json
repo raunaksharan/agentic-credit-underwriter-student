@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-004",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Daniel Okafor",
+    "date_of_birth": "1988-01-30",
+    "national_id_last4": "9047",
+    "email": "daniel.okafor@example.com",
+    "address": {
+      "line1": "9 Juniper Lane",
+      "city": "Atlanta",
+      "state": "GA",
+      "postal_code": "30303"
+    }
+  },
+  "employment": {
+    "employer_name": "Crestline Retail Group",
+    "job_title": "Store Manager",
+    "employment_type": "full_time",
+    "start_date": "2018-04-09",
+    "stated_annual_income": 120000
+  },
+  "loan": {
+    "amount": 25000,
+    "term_months": 60,
+    "purpose": "debt_consolidation",
+    "annual_interest_rate": 0.139
+  },
+  "existing_monthly_debt_payments": 900,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-004/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-004/bank_statement.csv"
+    }
+  ]
+}

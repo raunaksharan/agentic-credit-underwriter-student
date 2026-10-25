@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-003",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Elena Duarte",
+    "date_of_birth": "1995-07-21",
+    "national_id_last4": "5562",
+    "email": "elena.duarte@example.com",
+    "address": {
+      "line1": "77 Mission Row",
+      "city": "San Diego",
+      "state": "CA",
+      "postal_code": "92101"
+    }
+  },
+  "employment": {
+    "employer_name": "Harborview Clinic",
+    "job_title": "Registered Nurse",
+    "employment_type": "full_time",
+    "start_date": "2021-09-01",
+    "stated_annual_income": 78000
+  },
+  "loan": {
+    "amount": 12000,
+    "term_months": 36,
+    "purpose": "auto_repair",
+    "annual_interest_rate": 0.129
+  },
+  "existing_monthly_debt_payments": 300,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-003/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-003/bank_statement.csv"
+    }
+  ]
+}
