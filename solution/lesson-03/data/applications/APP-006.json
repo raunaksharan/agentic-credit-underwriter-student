@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-006",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "James Whitfield",
+    "date_of_birth": "1984-09-09",
+    "national_id_last4": "6125",
+    "email": "james.whitfield@example.com",
+    "address": {
+      "line1": "55 Orchard Way",
+      "city": "Denver",
+      "state": "CO",
+      "postal_code": "80202"
+    }
+  },
+  "employment": {
+    "employer_name": "Summit Engineering",
+    "job_title": "Project Engineer",
+    "employment_type": "full_time",
+    "start_date": "2016-08-22",
+    "stated_annual_income": 88000
+  },
+  "loan": {
+    "amount": 18000,
+    "term_months": 36,
+    "purpose": "personal",
+    "annual_interest_rate": 0.124
+  },
+  "existing_monthly_debt_payments": 600,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-006/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-006/bank_statement.csv"
+    }
+  ]
+}

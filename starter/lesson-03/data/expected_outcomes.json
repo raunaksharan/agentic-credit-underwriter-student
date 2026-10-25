@@ -1,0 +1,34 @@
+{
+  "APP-001": {
+    "scenario": "Clean, well-qualified applicant",
+    "expected": "APPROVE"
+  },
+  "APP-002": {
+    "scenario": "Post-loan DTI ~46%: inside the manual-review band",
+    "expected": "MANUAL_REVIEW"
+  },
+  "APP-003": {
+    "scenario": "Credit bureau has no record: the system must not invent a score",
+    "expected": "MANUAL_REVIEW"
+  },
+  "APP-004": {
+    "scenario": "Stated income is ~43% higher than the payslip shows",
+    "expected": "MANUAL_REVIEW"
+  },
+  "APP-005": {
+    "scenario": "Low score and repeated delinquencies: clear policy decline",
+    "expected": "DECLINE"
+  },
+  "APP-006": {
+    "scenario": "Name on payslip does not match the applicant",
+    "expected": "MANUAL_REVIEW"
+  },
+  "APP-007": {
+    "scenario": "Self-employed applicant without the required tax return",
+    "expected": "MANUAL_REVIEW"
+  },
+  "APP-008": {
+    "scenario": "DTI ~44%: the agent stub approves, the decision engine overrides",
+    "expected": "MANUAL_REVIEW"
+  }
+}
