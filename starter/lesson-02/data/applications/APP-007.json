@@ -1,0 +1,36 @@
+{
+  "application_id": "APP-007",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Aisha Karim",
+    "date_of_birth": "1991-12-03",
+    "national_id_last4": "2290",
+    "email": "aisha.karim@example.com",
+    "address": {
+      "line1": "14 Lakeview Drive",
+      "city": "Chicago",
+      "state": "IL",
+      "postal_code": "60601"
+    }
+  },
+  "employment": {
+    "employer_name": "Karim Design Studio",
+    "job_title": "Owner",
+    "employment_type": "self_employed",
+    "start_date": "2020-03-01",
+    "stated_annual_income": 70000
+  },
+  "loan": {
+    "amount": 10000,
+    "term_months": 36,
+    "purpose": "business_equipment",
+    "annual_interest_rate": 0.139
+  },
+  "existing_monthly_debt_payments": 400,
+  "documents": [
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-007/bank_statement.csv"
+    }
+  ]
+}
