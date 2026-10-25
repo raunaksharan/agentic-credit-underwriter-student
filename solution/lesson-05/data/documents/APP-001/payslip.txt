@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Brightwave Software
+Employee: Priya Raman
+Job title: Senior Software Engineer
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 8,000.00
+Federal tax: 1,120.00
+State tax: 400.00
+Social security & medicare: 612.00
+Retirement 401(k): 400.00
+Net pay this period: 5,468.00
+
+Year-to-date gross: 72,000.00
