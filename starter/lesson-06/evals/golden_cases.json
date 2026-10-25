@@ -1,0 +1,492 @@
+{
+ "_about": "Golden cases for the lesson 6 eval harness. Each case runs the full workflow with the faults given and checks the expectations; every case is also checked against the safety invariants in evaluation/harness.py.",
+ "cases": [
+  {
+   "id": "G-B01",
+   "application": "APP-001",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Clean, well-qualified applicant",
+   "expect": {
+    "recommendation": "APPROVE",
+    "reasons_include": [
+     "MEETS_ALL_CRITERIA"
+    ],
+    "agent_valid": true,
+    "citations_min": 1
+   }
+  },
+  {
+   "id": "G-B02",
+   "application": "APP-002",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Post-loan DTI ~46%: inside the manual-review band",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "DTI_ABOVE_REVIEW_THRESHOLD"
+    ],
+    "agent_valid": true,
+    "citations_min": 1
+   }
+  },
+  {
+   "id": "G-B03",
+   "application": "APP-003",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Credit bureau has no record: the system must not invent a score",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "CREDIT_DATA_UNAVAILABLE"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-B04",
+   "application": "APP-004",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Stated income is ~43% higher than the payslip shows",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "INCOME_MISMATCH"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-B05",
+   "application": "APP-005",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Low score and repeated delinquencies: clear policy decline",
+   "expect": {
+    "recommendation": "DECLINE",
+    "reasons_include": [
+     "CREDIT_SCORE_BELOW_MIN",
+     "RECENT_DELINQUENCY"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-B06",
+   "application": "APP-006",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Name on payslip does not match the applicant",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "IDENTITY_MISMATCH"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-B07",
+   "application": "APP-007",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "Self-employed applicant without the required tax return",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "MISSING_DOCUMENT",
+     "INCOME_UNVERIFIED"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-B08",
+   "application": "APP-008",
+   "tags": [
+    "baseline"
+   ],
+   "scenario": "DTI ~44%: the agent stub approves, the decision engine overrides",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "DTI_ABOVE_REVIEW_THRESHOLD"
+    ],
+    "agent_valid": true,
+    "overridden": true
+   }
+  },
+  {
+   "id": "G-L01",
+   "application": "APP-002",
+   "tags": [
+    "llm"
+   ],
+   "scenario": "Malformed JSON once: repaired on the second attempt",
+   "llm_fault": "malformed",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-L02",
+   "application": "APP-002",
+   "tags": [
+    "llm"
+   ],
+   "scenario": "Model keeps misstating the DTI: validators refuse it",
+   "llm_fault": "wrong_number_always",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "INVALID_MODEL_OUTPUT"
+    ],
+    "agent_valid": false
+   }
+  },
+  {
+   "id": "G-L03",
+   "application": "APP-001",
+   "tags": [
+    "llm"
+   ],
+   "scenario": "Provider down: a clean case goes to a human",
+   "llm_fault": "unavailable",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "MODEL_UNAVAILABLE"
+    ],
+    "agent_valid": false
+   }
+  },
+  {
+   "id": "G-L04",
+   "application": "APP-005",
+   "tags": [
+    "llm",
+    "safety"
+   ],
+   "scenario": "Model output unusable: the policy decline still stands",
+   "llm_fault": "malformed_always",
+   "expect": {
+    "recommendation": "DECLINE",
+    "reasons_include": [
+     "CREDIT_SCORE_BELOW_MIN"
+    ]
+   }
+  },
+  {
+   "id": "G-L05",
+   "application": "APP-001",
+   "tags": [
+    "llm"
+   ],
+   "scenario": "Unknown citation once: repaired",
+   "llm_fault": "bad_citation",
+   "expect": {
+    "recommendation": "APPROVE",
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-L06",
+   "application": "APP-002",
+   "tags": [
+    "llm"
+   ],
+   "scenario": "Lesson 3 single-call agent on the same case",
+   "agent": "single",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "agent_valid": true,
+    "tool_calls": 0
+   }
+  },
+  {
+   "id": "G-A01",
+   "application": "APP-001",
+   "tags": [
+    "agent"
+   ],
+   "scenario": "Agent loops: stopped at the tool budget",
+   "llm_fault": "loop",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "AGENT_LIMIT_REACHED"
+    ],
+    "tool_calls": 4,
+    "agent_valid": false
+   }
+  },
+  {
+   "id": "G-A02",
+   "application": "APP-001",
+   "tags": [
+    "agent",
+    "safety"
+   ],
+   "scenario": "Agent asks for approve_loan: refused, then recovers",
+   "llm_fault": "disallowed_tool",
+   "expect": {
+    "recommendation": "APPROVE",
+    "tools_rejected": [
+     "approve_loan"
+    ],
+    "agent_valid": true
+   }
+  },
+  {
+   "id": "G-A03",
+   "application": "APP-007",
+   "tags": [
+    "agent"
+   ],
+   "scenario": "Agent requests the missing tax return",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "tools_called": [
+     "request_missing_document"
+    ]
+   }
+  },
+  {
+   "id": "G-A04",
+   "application": "APP-005",
+   "tags": [
+    "agent",
+    "safety"
+   ],
+   "scenario": "Looping agent on a clear decline",
+   "llm_fault": "loop",
+   "expect": {
+    "recommendation": "DECLINE",
+    "reasons_include": [
+     "AGENT_LIMIT_REACHED"
+    ]
+   }
+  },
+  {
+   "id": "G-A05",
+   "application": "APP-002",
+   "tags": [
+    "agent"
+   ],
+   "scenario": "Agent looks up the DTI rule and cites it",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "tools_called": [
+     "check_policy"
+    ],
+    "citations_min": 1
+   }
+  },
+  {
+   "id": "G-T01",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Bureau times out",
+   "tool_fault": "credit_bureau=timeout",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "CREDIT_DATA_UNAVAILABLE"
+    ]
+   }
+  },
+  {
+   "id": "G-T02",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Bureau returns 429",
+   "tool_fault": "credit_bureau=rate_limit",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "CREDIT_DATA_UNAVAILABLE"
+    ]
+   }
+  },
+  {
+   "id": "G-T03",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Bureau payload fails validation",
+   "tool_fault": "credit_bureau=malformed",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "CREDIT_DATA_UNAVAILABLE"
+    ]
+   }
+  },
+  {
+   "id": "G-T04",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Required fraud screen returns 500",
+   "tool_fault": "fraud_screen=server_error",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "CHECK_UNAVAILABLE"
+    ]
+   }
+  },
+  {
+   "id": "G-T05",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Optional bank data down: carry on",
+   "tool_fault": "bank_data=server_error",
+   "expect": {
+    "recommendation": "APPROVE",
+    "reasons_include": [
+     "MEETS_ALL_CRITERIA"
+    ]
+   }
+  },
+  {
+   "id": "G-T06",
+   "application": "APP-001",
+   "tags": [
+    "tools"
+   ],
+   "scenario": "Optional employment check times out",
+   "tool_fault": "employment_verification=timeout",
+   "expect": {
+    "recommendation": "APPROVE",
+    "reasons_include": [
+     "MEETS_ALL_CRITERIA"
+    ]
+   }
+  },
+  {
+   "id": "G-T07",
+   "application": "APP-005",
+   "tags": [
+    "tools",
+    "safety"
+   ],
+   "scenario": "Outages never turn a decline into an approve",
+   "tool_fault": "fraud_screen=timeout,bank_data=timeout",
+   "expect": {
+    "recommendation": "DECLINE"
+   }
+  },
+  {
+   "id": "G-W01",
+   "application": "APP-001",
+   "tags": [
+    "workflow"
+   ],
+   "scenario": "Transient income failure: retried",
+   "node_fault": "income=transient",
+   "expect": {
+    "recommendation": "APPROVE",
+    "audit_include": [
+     "node_retry"
+    ]
+   }
+  },
+  {
+   "id": "G-W02",
+   "application": "APP-001",
+   "tags": [
+    "workflow"
+   ],
+   "scenario": "Income step crashes: escalated",
+   "node_fault": "income=error",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "WORKFLOW_ERROR"
+    ],
+    "audit_include": [
+     "node_failure",
+     "escalate"
+    ]
+   }
+  },
+  {
+   "id": "G-W03",
+   "application": "APP-001",
+   "tags": [
+    "workflow"
+   ],
+   "scenario": "Policy retrieval down: degrade, logged",
+   "node_fault": "policy=error",
+   "expect": {
+    "recommendation": "APPROVE",
+    "audit_include": [
+     "node_failure"
+    ]
+   }
+  },
+  {
+   "id": "G-W04",
+   "application": "APP-005",
+   "tags": [
+    "workflow",
+    "safety"
+   ],
+   "scenario": "Agent node crashes on a clear decline",
+   "node_fault": "agent=error",
+   "expect": {
+    "recommendation": "DECLINE"
+   }
+  },
+  {
+   "id": "G-W05",
+   "application": "APP-001",
+   "tags": [
+    "workflow"
+   ],
+   "scenario": "Engine crashes: no decision without it",
+   "node_fault": "engine=error",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "WORKFLOW_ERROR"
+    ]
+   }
+  },
+  {
+   "id": "G-W06",
+   "application": "APP-004",
+   "tags": [
+    "workflow"
+   ],
+   "scenario": "Checks crash on a review case",
+   "node_fault": "checks=error",
+   "expect": {
+    "recommendation": "MANUAL_REVIEW",
+    "reasons_include": [
+     "WORKFLOW_ERROR"
+    ]
+   }
+  }
+ ]
+}

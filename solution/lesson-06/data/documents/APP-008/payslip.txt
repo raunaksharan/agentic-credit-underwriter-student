@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Piedmont Health Systems
+Employee: Hannah Brooks
+Job title: Billing Analyst
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 6,000.00
+Federal tax: 840.00
+State tax: 300.00
+Social security & medicare: 459.00
+Retirement 401(k): 300.00
+Net pay this period: 4,101.00
+
+Year-to-date gross: 54,000.00
