@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Harborview Clinic
+Employee: Elena Duarte
+Job title: Registered Nurse
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 6,500.00
+Federal tax: 910.00
+State tax: 325.00
+Social security & medicare: 497.25
+Retirement 401(k): 325.00
+Net pay this period: 4,442.75
+
+Year-to-date gross: 58,500.00

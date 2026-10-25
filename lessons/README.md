@@ -12,3 +12,4 @@ One system, built lesson by lesson. Each lesson folder has the guide, `START-HER
 | 05 | [Agentic workflows](05-agentic-workflows/) | `solution/lesson-05` | `starter/lesson-05` |
 | 06 | [Testing and evaluation](06-evaluation/) | `solution/lesson-06` | `starter/lesson-06` |
 | 07 | [Observability](07-observability/) | `solution/lesson-07` | `starter/lesson-07` |
+| 08 | [Reliability and performance](08-reliability/) | `solution/lesson-08` | `starter/lesson-08` |

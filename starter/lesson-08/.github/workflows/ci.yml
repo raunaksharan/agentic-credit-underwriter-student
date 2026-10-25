@@ -1,0 +1,30 @@
+# CI: lint, test and smoke-run on every push and pull request (GitHub Actions).
+#
+# This is the CI configuration, not application code. GitHub only reads CI files
+# from .github/workflows/, so the folder name is fixed by GitHub. The underwriting
+# workflow itself lives in src/underwriter/workflow/.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install
+        run: uv sync --all-groups
+      - name: Lint
+        run: uv run ruff check .
+      - name: Test
+        run: uv run pytest
+      - name: Run every sample application through the underwriting workflow
+        run: uv run underwriter run-all
+      - name: Retrieval eval (lesson 2)
+        run: uv run underwriter eval-retrieval

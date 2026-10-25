@@ -1,0 +1,40 @@
+{
+  "application_id": "APP-008",
+  "submitted_at": "2026-10-05T10:15:00Z",
+  "applicant": {
+    "full_name": "Hannah Brooks",
+    "date_of_birth": "1989-04-27",
+    "national_id_last4": "8406",
+    "email": "hannah.brooks@example.com",
+    "address": {
+      "line1": "610 Cedar Point",
+      "city": "Raleigh",
+      "state": "NC",
+      "postal_code": "27601"
+    }
+  },
+  "employment": {
+    "employer_name": "Piedmont Health Systems",
+    "job_title": "Billing Analyst",
+    "employment_type": "full_time",
+    "start_date": "2020-11-02",
+    "stated_annual_income": 72000
+  },
+  "loan": {
+    "amount": 15000,
+    "term_months": 36,
+    "purpose": "debt_consolidation",
+    "annual_interest_rate": 0.129
+  },
+  "existing_monthly_debt_payments": 2130,
+  "documents": [
+    {
+      "doc_type": "payslip",
+      "path": "documents/APP-008/payslip.txt"
+    },
+    {
+      "doc_type": "bank_statement",
+      "path": "documents/APP-008/bank_statement.csv"
+    }
+  ]
+}

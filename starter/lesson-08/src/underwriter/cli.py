@@ -1,0 +1,315 @@
+"""Command-line entry point.
+
+    underwriter run data/applications/APP-002.json   # one application, full trace
+    underwriter run-all                               # every sample vs expected outcome
+    underwriter ingest                                # parse + chunk the corpus (L2)
+    underwriter search "DTI 46%" [--as-of 2020-06-01] # hybrid retrieval (L2)
+    underwriter eval-retrieval                        # retrieval eval (L2)
+    underwriter check-llm                             # ping the configured LLM (L3)
+    underwriter prompt data/applications/APP-002.json # what the model sees (L3)
+    underwriter run APP-002.json --llm-fault malformed  # rehearse a model failure (L3)
+    underwriter run APP-001.json --tool-fault credit_bureau=timeout   # tool failure (L4)
+    underwriter run APP-003.json --agent single         # lesson 3 agent, no tools (L4)
+    underwriter graph                                   # the workflow as Mermaid (L5)
+    underwriter eval [--tag tools] [--markdown out.md]  # golden cases + gates (L6)
+    underwriter trace APP-002.json [--tool-fault …]     # span tree, tokens, cost (L7)
+    underwriter bench [--tool-fault …]                  # sequential vs concurrent checks (L8)
+    underwriter run APP-001.json --node-fault income=error          # node failure (L5)
+    underwriter run APP-002.json --review-as APPROVE --reviewer u-1042 --note "…"  (L5)
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+
+from underwriter.domain.models import UnderwritingDecision
+from underwriter.ingestion.documents import DATA_DIR, load_application
+from underwriter.workflow.orchestrator import UnderwritingWorkflow
+
+
+def _print_decision(d: UnderwritingDecision) -> None:
+    print(f"\n=== {d.application_id}: {d.recommendation.value} ===")
+    print(f"Reasons:  {', '.join(r.value for r in d.reason_codes)}")
+    print(f"Agent proposed {d.agent_recommendation.recommendation.value}"
+          + ("; overridden by policy" if d.overridden_by_policy else ""))
+    p = d.agent_recommendation
+    print(f"Model:    {p.model} · prompt {p.prompt_version} · attempts {p.attempts} · "
+          f"tokens {p.input_tokens} in / {p.output_tokens} out"
+          + ("" if p.valid else f" · INVALID: {'; '.join(p.validation_errors[:2])}"))
+    for c in p.tool_calls:
+        print(f"Tool:     {c['tool']}({json.dumps(c['arguments'])}) -> {c['outcome']}"
+              + (f": {c['detail']}" if c["detail"] else ""))
+    if d.agent_recommendation.missing_information:
+        print("Missing:  " + "; ".join(d.agent_recommendation.missing_information))
+    if d.human_review:
+        r = d.human_review
+        print(f"Reviewer: {r.reviewer} decided {r.decision.value} ({d.review_case_id}): {r.note}")
+        print(f"Final:    {d.final_recommendation.value}")
+    if d.usage:
+        u = d.usage
+        print(f"Usage:    {u.llm_calls} LLM calls · {u.input_tokens} in / {u.output_tokens} out"
+              f" · ${u.cost_usd:.6f} · {u.total_ms:.0f} ms")
+    print("Metrics:  " + ", ".join(f"{k}={v}" for k, v in sorted(d.metrics.items())))
+    print("Trace:")
+    for e in d.audit_trail:
+        print(f"  [{e.step:<19}] {e.actor:<26} {e.summary}")
+
+
+def _workflow(llm_fault: str | None = None, tool_fault: str | None = None,
+              agent: str | None = None, node_fault: str | None = None) -> UnderwritingWorkflow:
+    from underwriter.agents.factory import get_agent
+    from underwriter.tools.faults import FaultPlan
+    from underwriter.workflow.resilience import NodeFaults
+    faults = FaultPlan.parse(tool_fault) if tool_fault else None
+    node_faults = NodeFaults.parse(node_fault) if node_fault else None
+    return UnderwritingWorkflow(agent=get_agent(agent, llm_fault), faults=faults,
+                                node_faults=node_faults)
+
+
+def cmd_run(path: str, as_json: bool, llm_fault: str | None = None,
+            tool_fault: str | None = None, agent: str | None = None,
+            node_fault: str | None = None, review: dict | None = None) -> int:
+    wf = _workflow(llm_fault, tool_fault, agent, node_fault)
+    app = load_application(path)
+    if review:
+        from underwriter.domain.models import HumanReview
+        from underwriter.workflow.orchestrator import PendingReview
+        result = wf.start(app)
+        if isinstance(result, PendingReview):
+            print(f"Paused for review on thread {result.thread_id}:\n  "
+                  + json.dumps(result.request))
+            result = wf.resume(result.thread_id, HumanReview(**review))
+        else:
+            print("No review needed: the engine decided without escalating.")
+        decision = result
+    else:
+        decision = wf.run(app)
+    if as_json:
+        print(decision.model_dump_json(indent=2))
+    else:
+        _print_decision(decision)
+    return 0
+
+
+def cmd_run_all() -> int:
+    expected = json.loads((DATA_DIR / "expected_outcomes.json").read_text())
+    workflow = UnderwritingWorkflow()
+    failures = 0
+    print(f"{'Application':<12} {'Expected':<14} {'Actual':<14} Reasons")
+    for app_id, spec in expected.items():
+        d = workflow.run(load_application(DATA_DIR / "applications" / f"{app_id}.json"))
+        ok = d.recommendation.value == spec["expected"]
+        failures += not ok
+        mark = "ok  " if ok else "FAIL"
+        print(f"{app_id:<12} {spec['expected']:<14} {d.recommendation.value:<14} "
+              f"{mark} {', '.join(r.value for r in d.reason_codes)}")
+    print(f"\n{len(expected) - failures}/{len(expected)} match expected outcomes")
+    return 1 if failures else 0
+
+
+def cmd_eval(tag: str | None, markdown: str | None, update_baseline: bool) -> int:
+    from pathlib import Path
+
+    from underwriter.evaluation.harness import print_report, run_eval, write_baseline
+    report = run_eval(tag)
+    print_report(report)
+    if markdown:
+        Path(markdown).write_text(report.markdown())
+    if update_baseline:
+        if tag:
+            print("--update-baseline needs the full suite (no --tag)")
+            return 2
+        write_baseline(report)
+        print("baseline updated: evals/baseline.json")
+    return 0 if report.passed else 1
+
+
+def cmd_bench(path: str, tool_fault: str | None, runs: int) -> int:
+    """Lesson 8: the four checks one after another vs concurrently, same faults."""
+    import time as _time
+
+    from underwriter.reliability.parallel import CHECKS_DEADLINE_S, run_checks_concurrently
+    from underwriter.tools.checks import CHECKS, run_checks
+    from underwriter.tools.faults import FaultPlan
+    spec = tool_fault or ",".join(f"{c.name}=latency:200" for c in CHECKS)
+    app = load_application(path)
+    rows = []
+    for label, fn in (("sequential", run_checks), ("concurrent", run_checks_concurrently)):
+        times, statuses = [], []
+        for _ in range(runs):
+            t0 = _time.perf_counter()
+            results = fn(app, FaultPlan.parse(spec))
+            times.append((_time.perf_counter() - t0) * 1000)
+            statuses = [f"{r.tool}={r.status.value}" + (f"×{r.attempts}" if r.attempts > 1
+                                                       else "") for r in results]
+        rows.append((label, sorted(times)[len(times) // 2], statuses))
+    print(f"faults: {spec}   deadline: {CHECKS_DEADLINE_S:.1f}s   runs: {runs}")
+    for label, median, statuses in rows:
+        print(f"{label:<11} {median:8.1f} ms (median)  {' '.join(statuses)}")
+    return 0
+
+
+def cmd_trace(path: str, llm_fault: str | None, tool_fault: str | None,
+              node_fault: str | None) -> int:
+    from underwriter.observability.report import render_tree
+    from underwriter.observability.tracing import memory_exporter
+    memory = memory_exporter()
+    wf = _workflow(llm_fault, tool_fault, None, node_fault)
+    app = load_application(path)
+    wf.run(app)  # warm-up: the first run in a process pays one-time setup
+    memory.clear()
+    d = wf.run(app)
+    print(render_tree(memory.get_finished_spans()))
+    u = d.usage
+    cost = f"${u.cost_usd:.6f}" if u.cost_known else "unknown (no price for a model)"
+    print(f"\n{d.recommendation.value} · {u.llm_calls} LLM calls · {u.input_tokens} tokens in / "
+          f"{u.output_tokens} out · cost {cost} · {u.total_ms:.1f} ms total, "
+          f"{sum(u.step_ms.values()):.1f} ms in nodes")
+    return 0
+
+
+def cmd_graph() -> int:
+    print(UnderwritingWorkflow().graph.get_graph().draw_mermaid())
+    return 0
+
+
+def cmd_check_llm() -> int:
+    from underwriter.llm.client import LLMUnavailable, Message
+    from underwriter.llm.config import get_llm_client
+    try:
+        client = get_llm_client()
+        ping = Message(role="user", content='Reply with the JSON {"reply": "ok"}')
+        resp = client.complete([ping], max_output_tokens=20, json_mode=True)
+    except LLMUnavailable as exc:
+        print(f"LLM unavailable: {exc}")
+        return 1
+    print(f"model {resp.model} · {resp.input_tokens} tokens in / {resp.output_tokens} out · "
+          f"{resp.latency_ms:.0f} ms\nreply: {resp.text.strip()[:200]}")
+    return 0
+
+
+def cmd_prompt(path: str) -> int:
+    """Print exactly what the model would see for this application."""
+    from underwriter.agents.underwriting import build_messages
+    case, _ = UnderwritingWorkflow().assemble_case(load_application(path))
+    messages, ctx = build_messages(case)
+    for m in messages:
+        print(f"===== {m.role} =====\n{m.content}\n")
+    print(f"[context: {len(ctx.as_json)} chars, {len(ctx.allowed_ids)} citable ids, "
+          f"{ctx.dropped_policy} policy excerpts dropped for budget]")
+    return 0
+
+
+def cmd_ingest() -> int:
+    from underwriter.rag.retriever import default_index
+    idx = default_index()
+    print(f"{'Document':<28} {'Status':<11} Chunks")
+    for doc_id, n in idx.stats().items():
+        print(f"{doc_id:<28} {idx.docs[doc_id].status:<11} {n}")
+    print(f"\n{len(idx.chunks)} chunks from {len(idx.docs)} documents "
+          f"(embedder: {idx.embedder.name})")
+    return 0
+
+
+def cmd_search(query: str, k: int, as_of: str | None, include_withdrawn: bool) -> int:
+    from datetime import date
+
+    from underwriter.rag.retriever import PolicyRetriever
+    res = PolicyRetriever().retrieve(query, k=k, include_withdrawn=include_withdrawn,
+                                     as_of=date.fromisoformat(as_of) if as_of else None)
+    print(f"Query: {query}  (as of {res.as_of})")
+    if res.abstained:
+        print(res.reason)
+        return 0
+    for i, r in enumerate(res.results, 1):
+        c = r.chunk
+        flag = "" if c.status == "current" else f"  [{c.status.upper()}]"
+        print(f"\n{i}. {c.citation}{flag}\n   id: {c.chunk_id}\n   rrf {r.score:.4f} · "
+              f"bm25 rank {r.bm25_rank or '-'} · vector rank {r.vector_rank or '-'}\n"
+              f"   {c.text[:240]}…")
+    return 0
+
+
+def cmd_eval_retrieval() -> int:
+    from underwriter.evaluation.retrieval import print_report, run_retrieval_eval
+    report = run_retrieval_eval()
+    print_report(report)
+    return 0 if report.passed == len(report.cases) else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="underwriter")
+    sub = parser.add_subparsers(dest="command", required=True)
+    run = sub.add_parser("run", help="Underwrite one application")
+    run.add_argument("path")
+    run.add_argument("--json", action="store_true", help="Print the full decision as JSON")
+    run.add_argument("--llm-fault", help="Mock LLM fault: malformed, bad_citation, wrong_number, "
+                     "unavailable, *_always (lesson 3), loop, disallowed_tool (lesson 4)")
+    run.add_argument("--tool-fault", help="e.g. credit_bureau=timeout,bank_data=server_error "
+                     "(kinds: timeout, rate_limit, server_error, malformed, latency:<ms>)")
+    run.add_argument("--agent", choices=["tools", "single"],
+                     help="tools: bounded tool-calling agent (default); single: lesson 3")
+    run.add_argument("--node-fault", help="e.g. income=transient, policy=error, analyze=hang "
+                     "(lesson 5)")
+    run.add_argument("--review-as", choices=["APPROVE", "DECLINE"],
+                     help="Run interactively and answer the human-review pause (lesson 5)")
+    run.add_argument("--reviewer", default="reviewer-demo")
+    run.add_argument("--note", default="Reviewed in the CLI demo.")
+    sub.add_parser("graph", help="Print the workflow graph as Mermaid (lesson 5)")
+    tr = sub.add_parser("trace", help="Run one application and print its span tree (lesson 7)")
+    tr.add_argument("path")
+    tr.add_argument("--llm-fault")
+    tr.add_argument("--tool-fault")
+    tr.add_argument("--node-fault")
+    be = sub.add_parser("bench", help="Time the checks sequentially vs concurrently (lesson 8)")
+    be.add_argument("path", nargs="?", default=str(DATA_DIR / "applications" / "APP-001.json"))
+    be.add_argument("--tool-fault", help="default: every check latency:200")
+    be.add_argument("--runs", type=int, default=3)
+    ev = sub.add_parser("eval", help="Golden cases, invariants and release gates (lesson 6)")
+    ev.add_argument("--tag", help="baseline, llm, agent, tools, workflow or safety")
+    ev.add_argument("--markdown", help="Also write the report as Markdown to this path")
+    ev.add_argument("--update-baseline", action="store_true",
+                    help="Accept the current metrics as evals/baseline.json")
+    sub.add_parser("check-llm", help="One tiny call to the configured LLM (lesson 3)")
+    prompt = sub.add_parser("prompt", help="Show the exact prompt for an application (lesson 3)")
+    prompt.add_argument("path")
+    sub.add_parser("run-all", help="Run every sample application against expected outcomes")
+    sub.add_parser("ingest", help="Parse and chunk the policy corpus; show counts")
+    search = sub.add_parser("search", help="Search the policy corpus")
+    search.add_argument("query")
+    search.add_argument("-k", type=int, default=5)
+    search.add_argument("--as-of", help="YYYY-MM-DD: retrieve what was in force on this date")
+    search.add_argument("--include-withdrawn", action="store_true",
+                        help="Research mode: also show withdrawn or superseded documents")
+    sub.add_parser("eval-retrieval", help="Run the lesson 2 retrieval eval")
+    args = parser.parse_args(argv)
+    if args.command == "run":
+        review = ({"reviewer": args.reviewer, "decision": args.review_as, "note": args.note}
+                  if args.review_as else None)
+        return cmd_run(args.path, args.json, args.llm_fault, args.tool_fault, args.agent,
+                       args.node_fault, review)
+    if args.command == "graph":
+        return cmd_graph()
+    if args.command == "bench":
+        return cmd_bench(args.path, args.tool_fault, args.runs)
+    if args.command == "trace":
+        return cmd_trace(args.path, args.llm_fault, args.tool_fault, args.node_fault)
+    if args.command == "eval":
+        return cmd_eval(args.tag, args.markdown, args.update_baseline)
+    if args.command == "check-llm":
+        return cmd_check_llm()
+    if args.command == "prompt":
+        return cmd_prompt(args.path)
+    if args.command == "ingest":
+        return cmd_ingest()
+    if args.command == "search":
+        return cmd_search(args.query, args.k, args.as_of, args.include_withdrawn)
+    if args.command == "eval-retrieval":
+        return cmd_eval_retrieval()
+    return cmd_run_all()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

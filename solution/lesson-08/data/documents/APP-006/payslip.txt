@@ -1,0 +1,15 @@
+PAY STATEMENT
+Employer: Summit Engineering
+Employee: James Whitmore
+Job title: Project Engineer
+Pay period: 2026-09-01 to 2026-09-30
+Pay frequency: monthly
+
+Gross pay this period: 7,333.33
+Federal tax: 1,026.67
+State tax: 366.67
+Social security & medicare: 561.00
+Retirement 401(k): 366.67
+Net pay this period: 5,012.33
+
+Year-to-date gross: 65,999.97
